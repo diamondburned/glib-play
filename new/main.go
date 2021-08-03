@@ -13,39 +13,23 @@ type intern struct {
 
 type T struct {
 	*intern
-	s *signals
-}
-
-type signals struct {
-	f map[int]func()
+	f func()
 }
 
 func NewT() *T {
 	t := &T{
 		intern: &intern{"hello"},
-		s: &signals{
-			f: make(map[int]func()),
-		},
 	}
 
-	t.s.f[1] = func() {
-		_ = t
+	t.f = func() {
 		fmt.Println(t.v)
 	}
-
-	runtime.SetFinalizer(t.s, func(sigs *signals) {
-		log.Println("finalizing sigs")
-	})
 
 	runtime.SetFinalizer(t.intern, func(intern *intern) {
 		log.Println("finalizing t")
 	})
 
 	return t
-}
-
-func (t *T) DoThing() {
-	t.s.f[1]()
 }
 
 func main() {
@@ -58,5 +42,5 @@ func main() {
 
 func do() {
 	newT := NewT()
-	newT.DoThing()
+	newT.f()
 }
